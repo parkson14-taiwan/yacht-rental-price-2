@@ -17,43 +17,16 @@
       {
         "id": "yacht_sand",
         "name": "Sand",
-        "basePax": 0,
+        "basePax": 15,
         "maxCapacity": 40,
-        "priceTiers": {
-          "weekday": [
-            { "upToPax": 15, "base4h": 3500 },
-            { "upToPax": 20, "base4h": 4000 },
-            { "upToPax": 25, "base4h": 4500 },
-            { "upToPax": 30, "base4h": 5000 },
-            { "upToPax": 35, "base4h": 5500 },
-            { "upToPax": 40, "base4h": 6000 }
-          ],
-          "weekend": [
-            { "upToPax": 15, "base4h": 4000 },
-            { "upToPax": 20, "base4h": 4500 },
-            { "upToPax": 25, "base4h": 5000 },
-            { "upToPax": 30, "base4h": 5500 },
-            { "upToPax": 35, "base4h": 6000 },
-            { "upToPax": 40, "base4h": 6500 }
-          ],
-          "ph": [
-            { "upToPax": 15, "base4h": 4800 },
-            { "upToPax": 20, "base4h": 5400 },
-            { "upToPax": 25, "base4h": 6000 },
-            { "upToPax": 30, "base4h": 6600 },
-            { "upToPax": 35, "base4h": 7200 },
-            { "upToPax": 40, "base4h": 7800 }
-          ]
-        },
-        "subsequentHourRateForAllTiers": {
-          "weekday": 1000,
-          "weekend": 1300,
-          "ph": 1560
+        "prices": {
+          "weekday": { "base4h": 3500, "subsequentHour": 1000, "specificExtraPaxCost": 100 },
+          "weekend": { "base4h": 4000, "subsequentHour": 1300, "specificExtraPaxCost": 100 },
+          "ph":      { "base4h": 4800, "subsequentHour": 1560, "specificExtraPaxCost": 120 }
         },
         "extraPaxCost": 0,
-        "variableExtraPax": false,
+        "variableExtraPax": true,
         "gstApplicable": true,
-        "hasTieredPaxPricing": true,
         "includedServices": "Karaoke\\nMicrowave/Oven\\nBluetooth-compatible Stereo System\\nFully Air-Conditioned saloon\\nOne 15 Marina",
         "addons": [
           { "name": "BBQ service", "price": 300, "selected": false, "id": "sand_addon_bbq_service" },
@@ -62,27 +35,11 @@
       },`;
 
     const arrayEndMarker = '\n];\n\n    // Populate PH tiers';
-    const oldRateLine = 'let currentSubsequentHourRate = currentSelectedYacht.hasTieredPaxPricing ? currentSelectedYacht.subsequentHourRateForAllTiers : subsequentHourRate;';
-    const patchedRateLine = `let currentSubsequentHourRate = currentSelectedYacht.hasTieredPaxPricing ? currentSelectedYacht.subsequentHourRateForAllTiers : subsequentHourRate;
-      if (currentSelectedYacht.hasTieredPaxPricing && typeof currentSelectedYacht.subsequentHourRateForAllTiers === 'object') {
-        currentSubsequentHourRate = currentSelectedYacht.subsequentHourRateForAllTiers[selectedTimeSlotValue] ?? 0;
-      }`;
 
     function injectSandPricing(html) {
-      let patched = html;
-
-      if (!patched.includes('"id": "yacht_sand"') && patched.includes(arrayEndMarker)) {
-        patched = patched.replace(arrayEndMarker, `\n${sandYachtBlock}\n];\n\n    // Populate PH tiers`);
-      }
-
-      if (
-        patched.includes(oldRateLine) &&
-        !patched.includes("typeof currentSelectedYacht.subsequentHourRateForAllTiers === 'object'")
-      ) {
-        patched = patched.replace(oldRateLine, patchedRateLine);
-      }
-
-      return patched;
+      if (html.includes('"id": "yacht_sand"')) return html;
+      if (!html.includes(arrayEndMarker)) return html;
+      return html.replace(arrayEndMarker, `\n${sandYachtBlock}\n];\n\n    // Populate PH tiers`);
     }
 
     fetch(baseCalculatorUrl, { cache: 'no-store' })
@@ -92,13 +49,14 @@
       })
       .then((baseHtml) => {
         const finalHtml = injectSandPricing(baseHtml);
-        document.open();
-        document.write(finalHtml);
-        document.close();
+        const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        window.location.replace(blobUrl);
+        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
       })
       .catch((error) => {
-        document.body.innerHTML = '<p>Unable to load calculator. Please refresh and try again.</p>';
         console.error(error);
+        window.location.replace('./yacht-calculator_base_vS250601.html');
       });
   </script>
 </body>
