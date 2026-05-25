@@ -1,21 +1,23 @@
 name: SGyacht Pricing Update
 
-# Triggered once by Codex to update SGyacht pricing, then removed by the workflow.
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - .github/workflows/sgyacht-update.yml
+      - ".github/workflows/sgyacht-update.yml"
 
 permissions:
   contents: write
 
 jobs:
-  update-sgyacht:
+  update_sgyacht:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: "actions/checkout@v4"
       - name: Patch SGyacht pricing
+        shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
@@ -26,12 +28,11 @@ jobs:
           if (markerIndex === -1) throw new Error('SGyacht block not found');
           const objectStart = text.lastIndexOf('      {', markerIndex);
           if (objectStart === -1) throw new Error('SGyacht object start not found');
-          let i = objectStart;
           let depth = 0;
           let inString = false;
           let escaped = false;
           let objectEnd = -1;
-          for (; i < text.length; i++) {
+          for (let i = objectStart; i < text.length; i++) {
             const ch = text[i];
             if (inString) {
               if (escaped) escaped = false;
@@ -82,14 +83,14 @@ jobs:
           { "name": "Pet Surcharge (per pet, not allowed in Saloon)", "price": 100, "selected": false, "id": "sgyacht_addon_pet_surcharge" }
         ]
       }`;
-          const updated = text.slice(0, objectStart) + replacement + text.slice(objectEnd);
-          fs.writeFileSync(path, updated);
+          fs.writeFileSync(path, text.slice(0, objectStart) + replacement + text.slice(objectEnd));
           NODE
       - name: Commit SGyacht update and remove workflow
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/sgyacht-update.yml
           git add yacht-calculator_vS250601.html
-          git commit -m "Update SGyacht pricing" || exit 0
+          git commit -m "Update SGyacht pricing"
           git push
