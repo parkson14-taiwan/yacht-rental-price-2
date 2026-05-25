@@ -388,18 +388,28 @@
       { 
         "id": "yacht_sgyacht",
         "name": "SGyacht",
-        "basePax": 10,
+        "basePax": 0,
         "maxCapacity": 28,
-        "prices": { 
-          "weekday": { "base4h": 599, "base5h": 799, "subsequentHour": 300, "specificExtraPaxCost": 65 }, 
-          "weekend": { "base4h": 999, "base5h": 1150, "subsequentHour": 300, "specificExtraPaxCost": 65 }, 
-          "ph":      { "base4h": 1199, "base5h": 1150, "subsequentHour": 300, "specificExtraPaxCost": 80 }
+        "priceTiers": { 
+          "weekday": [
+            { "upToPax": 15, "base4h": 1150 },
+            { "upToPax": 28, "base4h": 1500 }
+          ], 
+          "weekend": [
+            { "upToPax": 15, "base4h": 1550 },
+            { "upToPax": 28, "base4h": 1900 }
+          ], 
+          "ph": [
+            { "upToPax": 15, "base4h": 1550 },
+            { "upToPax": 28, "base4h": 1900 }
+          ]
         },
-        "hasSpecial5hrRate": true, 
+        "subsequentHourRateForAllTiers": 300,
         "extraPaxCost": 0, 
-        "variableExtraPax": true, 
+        "variableExtraPax": false, 
         "gstApplicable": true, 
-        "includedServices": "‧ Karaoke\\n‧ Bar counter\\n‧ Microwave/Oven\\n‧ Bluetooth-compatible Stereo System\\n‧ Fully Air-Conditioned saloon\\n‧ Washrooms and Shower Room\\n‧ 1x Changing room\\n‧ 1x Double seater Kayak w 2 paddles (Damage/lost fee $150)\\n‧ 1x Stand up paddleboard w 1 paddle (Damage/lost fee $150)\\n‧ 1x Floating Mat (Damage fee $200)",
+        "hasTieredPaxPricing": true, 
+        "includedServices": "Karaoke\\nBar counter\\nMicrowave/Oven\\nBluetooth-compatible Stereo System\\nFully Air-Conditioned saloon\\n1x Double seater Kayak w 2 paddles (Damage/lost fee $150)\\n1x Stand up paddleboard w 1 paddle (Damage/lost fee $150)\\n1x Floating Mat (Damage fee $200)\\nMarina at Keppel Bay",
         "addons": [
           { "name": "BBQ pit rental + BBQ service", "price": 200, "selected": false, "id": "sgyacht_addon_bbq_pit_service" },
           { "name": "Disposable dining set", "price": 50, "selected": false, "id": "sgyacht_addon_disposable_dining" },
