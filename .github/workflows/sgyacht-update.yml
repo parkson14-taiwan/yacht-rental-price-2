@@ -1,5 +1,6 @@
 name: SGyacht Pricing Update
 
+# Triggered once by Codex to update SGyacht pricing, then removed by the workflow.
 on:
   push:
     branches: [main]
