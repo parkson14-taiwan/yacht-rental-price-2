@@ -1,20 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Redirecting...</title>
-  <meta http-equiv="refresh" content="0;url=https://raw.githack.com/parkson14-taiwan/yacht-rental-price-2/07ca45fd16f785e4b3bdef4d7111de9fedff5887/yacht-calculator_vS250601.html" />
-  <script>
-    location.replace('https://raw.githack.com/parkson14-taiwan/yacht-rental-price-2/07ca45fd16f785e4b3bdef4d7111de9fedff5887/yacht-calculator_vS250601.html');
-  </script>
+  <title>Yacht Charter Price Calculator</title>
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 2rem; }
-    a { color: #2563eb; }
   </style>
 </head>
 <body>
-  <h1>Redirecting...</h1>
-  <p>If you are not redirected automatically, <a href="https://raw.githack.com/parkson14-taiwan/yacht-rental-price-2/07ca45fd16f785e4b3bdef4d7111de9fedff5887/yacht-calculator_vS250601.html">click here to open the Yacht Calculator</a>.</p>
+  <p>Loading...</p>
+  <script>
+    const baseCalculatorUrl = './yacht-calculator_base_vS250601.html';
+
+    const sandYachtBlock = `
+      {
+        "id": "yacht_sand",
+        "name": "Sand",
+        "basePax": 0,
+        "maxCapacity": 40,
+        "priceTiers": {
+          "weekday": [
+            { "upToPax": 15, "base4h": 3500 },
+            { "upToPax": 20, "base4h": 4000 },
+            { "upToPax": 25, "base4h": 4500 },
+            { "upToPax": 30, "base4h": 5000 },
+            { "upToPax": 35, "base4h": 5500 },
+            { "upToPax": 40, "base4h": 6000 }
+          ],
+          "weekend": [
+            { "upToPax": 15, "base4h": 4000 },
+            { "upToPax": 20, "base4h": 4500 },
+            { "upToPax": 25, "base4h": 5000 },
+            { "upToPax": 30, "base4h": 5500 },
+            { "upToPax": 35, "base4h": 6000 },
+            { "upToPax": 40, "base4h": 6500 }
+          ],
+          "ph": [
+            { "upToPax": 15, "base4h": 4800 },
+            { "upToPax": 20, "base4h": 5400 },
+            { "upToPax": 25, "base4h": 6000 },
+            { "upToPax": 30, "base4h": 6600 },
+            { "upToPax": 35, "base4h": 7200 },
+            { "upToPax": 40, "base4h": 7800 }
+          ]
+        },
+        "subsequentHourRateForAllTiers": {
+          "weekday": 1000,
+          "weekend": 1300,
+          "ph": 1560
+        },
+        "extraPaxCost": 0,
+        "variableExtraPax": false,
+        "gstApplicable": true,
+        "hasTieredPaxPricing": true,
+        "includedServices": "Karaoke\\nMicrowave/Oven\\nBluetooth-compatible Stereo System\\nFully Air-Conditioned saloon\\nOne 15 Marina",
+        "addons": [
+          { "name": "BBQ service", "price": 300, "selected": false, "id": "sand_addon_bbq_service" },
+          { "name": "Jetski (1hr, pillion only)", "price": 400, "selected": false, "id": "sand_addon_jetski_1hr_pillion" }
+        ]
+      },`;
+
+    const arrayEndMarker = '\n];\n\n    // Populate PH tiers';
+    const oldRateLine = 'let currentSubsequentHourRate = currentSelectedYacht.hasTieredPaxPricing ? currentSelectedYacht.subsequentHourRateForAllTiers : subsequentHourRate;';
+    const patchedRateLine = `let currentSubsequentHourRate = currentSelectedYacht.hasTieredPaxPricing ? currentSelectedYacht.subsequentHourRateForAllTiers : subsequentHourRate;
+      if (currentSelectedYacht.hasTieredPaxPricing && typeof currentSelectedYacht.subsequentHourRateForAllTiers === 'object') {
+        currentSubsequentHourRate = currentSelectedYacht.subsequentHourRateForAllTiers[selectedTimeSlotValue] ?? 0;
+      }`;
+
+    function injectSandPricing(html) {
+      let patched = html;
+
+      if (!patched.includes('"id": "yacht_sand"') && patched.includes(arrayEndMarker)) {
+        patched = patched.replace(arrayEndMarker, `\n${sandYachtBlock}\n];\n\n    // Populate PH tiers`);
+      }
+
+      if (
+        patched.includes(oldRateLine) &&
+        !patched.includes("typeof currentSelectedYacht.subsequentHourRateForAllTiers === 'object'")
+      ) {
+        patched = patched.replace(oldRateLine, patchedRateLine);
+      }
+
+      return patched;
+    }
+
+    fetch(baseCalculatorUrl, { cache: 'no-store' })
+      .then((response) => {
+        if (!response.ok) throw new Error('Unable to load base calculator');
+        return response.text();
+      })
+      .then((baseHtml) => {
+        const finalHtml = injectSandPricing(baseHtml);
+        document.open();
+        document.write(finalHtml);
+        document.close();
+      })
+      .catch((error) => {
+        document.body.innerHTML = '<p>Unable to load calculator. Please refresh and try again.</p>';
+        console.error(error);
+      });
+  </script>
 </body>
 </html>
