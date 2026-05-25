@@ -11,10 +11,10 @@
 <body>
   <p>Loading...</p>
   <script>
-    const baseCalculatorUrl = './yacht-calculator_base_vS250601.html';
+    (function () {
+      const baseCalculatorUrl = './yacht-calculator_base_vS250601.html';
 
-    const sandYachtBlock = `
-      {
+      const sandYachtBlock = `      {
         "id": "yacht_sand",
         "name": "Sand",
         "basePax": 15,
@@ -32,32 +32,37 @@
           { "name": "BBQ service", "price": 300, "selected": false, "id": "sand_addon_bbq_service" },
           { "name": "Jetski (1hr, pillion only)", "price": 400, "selected": false, "id": "sand_addon_jetski_1hr_pillion" }
         ]
-      },`;
+      }`;
 
-    const arrayEndMarker = '\n];\n\n    // Populate PH tiers';
+      function injectSandPricing(html) {
+        if (html.includes('"id": "yacht_sand"')) return html;
 
-    function injectSandPricing(html) {
-      if (html.includes('"id": "yacht_sand"')) return html;
-      if (!html.includes(arrayEndMarker)) return html;
-      return html.replace(arrayEndMarker, `\n${sandYachtBlock}\n];\n\n    // Populate PH tiers`);
-    }
+        const anchorText = '// Populate PH tiers';
+        const anchorIndex = html.indexOf(anchorText);
+        if (anchorIndex === -1) return html;
 
-    fetch(baseCalculatorUrl, { cache: 'no-store' })
-      .then((response) => {
-        if (!response.ok) throw new Error('Unable to load base calculator');
-        return response.text();
-      })
-      .then((baseHtml) => {
-        const finalHtml = injectSandPricing(baseHtml);
-        const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
-        const blobUrl = URL.createObjectURL(blob);
-        window.location.replace(blobUrl);
-        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
-      })
-      .catch((error) => {
-        console.error(error);
-        window.location.replace('./yacht-calculator_base_vS250601.html');
-      });
+        const arrayEndIndex = html.lastIndexOf('];', anchorIndex);
+        if (arrayEndIndex === -1) return html;
+
+        return `${html.slice(0, arrayEndIndex)},\n${sandYachtBlock}\n${html.slice(arrayEndIndex)}`;
+      }
+
+      fetch(baseCalculatorUrl, { cache: 'no-store' })
+        .then((response) => {
+          if (!response.ok) throw new Error('Unable to load base calculator');
+          return response.text();
+        })
+        .then((baseHtml) => {
+          const finalHtml = injectSandPricing(baseHtml);
+          document.open();
+          document.write(finalHtml);
+          document.close();
+        })
+        .catch((error) => {
+          console.error(error);
+          window.location.replace(baseCalculatorUrl);
+        });
+    })();
   </script>
 </body>
 </html>
