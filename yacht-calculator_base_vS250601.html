@@ -659,6 +659,25 @@
           { "name": "No Drinks Included", "price": 0, "selected": false, "id": "esora_addon_no_drinks_included" },
           { "name": "No Pets Allowed", "price": 0, "selected": false, "id": "esora_addon_no_pets_allowed" }
         ]
+      },
+      { 
+        "id": "yacht_sand",
+        "name": "Sand",
+        "basePax": 10,
+        "maxCapacity": 40,
+        "prices": {
+          "weekday": { "base4h": 2500, "subsequentHour": 500, "specificExtraPaxCost": 80 },
+          "weekend": { "base4h": 2800, "subsequentHour": 750, "specificExtraPaxCost": 80 },
+          "ph":      { "base4h": 4800, "subsequentHour": 1560, "specificExtraPaxCost": 120 }
+        },
+        "extraPaxCost": 0,
+        "variableExtraPax": true,
+        "gstApplicable": true,
+        "includedServices": "Karaoke\\nMicrowave/Oven\\nBluetooth-compatible Stereo System\\nFully Air-Conditioned saloon\\nOne 15 Marina",
+        "addons": [
+          { "name": "BBQ service", "price": 300, "selected": false, "id": "sand_addon_bbq_service" },
+          { "name": "JetSki Rental (per hour)", "price": 500, "selected": false, "id": "sand_addon_jetski_1hr_pillion" }
+        ]
       }
 ];
 

@@ -14,48 +14,14 @@
     (function () {
       const baseCalculatorUrl = './yacht-calculator_base_vS250601.html';
 
-      const sandYachtBlock = `      {
-        "id": "yacht_sand",
-        "name": "Sand",
-        "basePax": 10,
-        "maxCapacity": 40,
-        "prices": {
-          "weekday": { "base4h": 2500, "subsequentHour": 500, "specificExtraPaxCost": 80 },
-          "weekend": { "base4h": 2800, "subsequentHour": 750, "specificExtraPaxCost": 80 },
-          "ph":      { "base4h": 4800, "subsequentHour": 1560, "specificExtraPaxCost": 120 }
-        },
-        "extraPaxCost": 0,
-        "variableExtraPax": true,
-        "gstApplicable": true,
-        "includedServices": "Karaoke\\nMicrowave/Oven\\nBluetooth-compatible Stereo System\\nFully Air-Conditioned saloon\\nOne 15 Marina",
-        "addons": [
-          { "name": "BBQ service", "price": 300, "selected": false, "id": "sand_addon_bbq_service" },
-          { "name": "JetSki Rental (per hour)", "price": 500, "selected": false, "id": "sand_addon_jetski_1hr_pillion" }
-        ]
-      }`;
-
-      function injectSandPricing(html) {
-        if (html.includes('"id": "yacht_sand"')) return html;
-
-        const anchorText = '// Populate PH tiers';
-        const anchorIndex = html.indexOf(anchorText);
-        if (anchorIndex === -1) return html;
-
-        const arrayEndIndex = html.lastIndexOf('];', anchorIndex);
-        if (arrayEndIndex === -1) return html;
-
-        return `${html.slice(0, arrayEndIndex)},\n${sandYachtBlock}\n${html.slice(arrayEndIndex)}`;
-      }
-
       fetch(baseCalculatorUrl, { cache: 'no-store' })
         .then((response) => {
           if (!response.ok) throw new Error('Unable to load base calculator');
           return response.text();
         })
         .then((baseHtml) => {
-          const finalHtml = injectSandPricing(baseHtml);
           document.open();
-          document.write(finalHtml);
+          document.write(baseHtml);
           document.close();
         })
         .catch((error) => {
